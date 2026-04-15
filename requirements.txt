@@ -1,0 +1,2 @@
+This project is to build a database that continually monitors energy markets in real time, across chosen zones in Europe and calculates useful information such as cross-border price spreads as screening signals for potential trading opportunities, bidding zones within countries, etc. 
+I have a postgres database and the 'scheduler.py' needs to always run to get new data every 15 minutes. 
