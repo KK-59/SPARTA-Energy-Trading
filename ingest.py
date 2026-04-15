@@ -34,6 +34,6 @@ def fetch_and_store(zone_code):
     except Exception as e:
         print(f"Failed for {zone_code}: {e}")
 
-zones = ['FR', 'DE_LU', 'NO_2']
+zones = ['FR', 'DE_LU', 'NO_2', 'NL', 'BE']
 for zone in zones:
     fetch_and_store(zone)
