@@ -8,6 +8,10 @@ from sqlalchemy import create_engine, text
 load_dotenv('api.env')
 engine = create_engine(os.getenv('DB_URL'))
 
+from setup_db import setup_prices_table, setup_signals_table
+setup_prices_table(engine)
+setup_signals_table(engine)
+
 from ingest import fetch_and_store
 from signalsnippets import (
     add_spreads, add_spread_statistics, add_arbitrage_candidate_flags,
@@ -56,7 +60,9 @@ def run_all():
         pivot = add_price_spike_flag(pivot, DEFAULT_ZONES)
         store_signals(pivot, engine)
     except Exception as e:
+        import traceback
         print(f"Signal computation failed: {e}")
+        traceback.print_exc()
 
     print(f"Pipeline complete at {pd.Timestamp.now()}")
 

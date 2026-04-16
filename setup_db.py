@@ -5,6 +5,19 @@ import os
 load_dotenv('api.env')
 engine = create_engine(os.getenv('DB_URL'))
 
+def setup_prices_table(engine):
+    with engine.connect() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS prices (
+                timestamp TIMESTAMPTZ NOT NULL,
+                zone TEXT NOT NULL,
+                price_eur_mwh DOUBLE PRECISION,
+                PRIMARY KEY (timestamp, zone)
+            );
+        """))
+        conn.commit()
+        print("Prices table created.")
+
 def setup_signals_table(engine):
     with engine.connect() as conn:
         conn.execute(text("""
