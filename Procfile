@@ -1,5 +1,1 @@
-[phases.build]
-cmds = ["pip install -r requirements.txt"]
-
-[start]
-cmd = "python scheduler.py"
+worker: python scheduler.py
