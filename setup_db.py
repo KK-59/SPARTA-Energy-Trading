@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 import os
 
-load_dotenv('api.env')
+load_dotenv()
 engine = create_engine(os.getenv('DB_URL'))
 
 def setup_prices_table(engine):

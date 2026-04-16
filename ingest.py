@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 import os
 
-load_dotenv('api.env')
+load_dotenv()
 
 client = EntsoePandasClient(api_key=os.getenv('ENTSO_API_KEY'))
 engine = create_engine(os.getenv('DB_URL'))

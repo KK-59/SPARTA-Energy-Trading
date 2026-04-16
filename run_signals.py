@@ -9,7 +9,7 @@ from signalsnippets import (
     add_price_spike_flag, DEFAULT_ZONES, SPREAD_PAIRS, Z_SCORE_THRESHOLD
 )
 
-load_dotenv('api.env')
+load_dotenv()
 engine = create_engine(os.getenv('DB_URL'))
 
 def load_prices(engine, zones):

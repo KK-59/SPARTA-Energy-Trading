@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 import pandas as pd
 import os
 
-load_dotenv('api.env')
+load_dotenv()
 engine = create_engine(os.getenv('DB_URL'))
 
 def calculate_spreads(zone_a, zone_b):

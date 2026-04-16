@@ -5,7 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
-load_dotenv('api.env')
+load_dotenv()
 engine = create_engine(os.getenv('DB_URL'))
 
 from setup_db import setup_prices_table, setup_signals_table
