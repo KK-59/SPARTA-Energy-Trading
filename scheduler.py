@@ -22,14 +22,14 @@ from zone_stats import setup_zone_stats_table
 
 ZONES = ['FR', 'DE_LU', 'NO_2', 'NL', 'BE']
 
-def load_recent_prices(engine, zones, hours=48):
+def load_recent_prices(engine, zones, days=14):
     zone_list = ','.join([repr(z) for z in zones])
     df = pd.read_sql(
         f"""
         SELECT timestamp, zone, price_eur_mwh
         FROM prices
         WHERE zone IN ({zone_list})
-        AND timestamp >= NOW() - INTERVAL '{hours} hours'
+        AND timestamp >= NOW() - INTERVAL '{days} hours'
         ORDER BY timestamp
         """,
         engine

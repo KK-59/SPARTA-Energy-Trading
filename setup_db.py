@@ -43,4 +43,5 @@ def setup_signals_table(engine):
         conn.commit()
         print("Signals table created.")
 
+setup_prices_table(engine)
 setup_signals_table(engine)
