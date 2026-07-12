@@ -47,7 +47,7 @@ def run_all():
     # step 2: recompute signals on last 48 hours
     print("Computing signals...")
     try:
-        pivot = load_recent_prices(engine, DEFAULT_ZONES, hours=48)
+        pivot = load_recent_prices(engine, DEFAULT_ZONES, days=14)
         pivot = add_spreads(pivot)
         pivot = add_spread_statistics(pivot)
         pivot = add_arbitrage_candidate_flags(pivot)
