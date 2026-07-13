@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import json
 import os
+import math
 
 load_dotenv()
 engine = create_engine(os.getenv("DB_URL"))
@@ -32,7 +33,16 @@ class Handler(BaseHTTPRequestHandler):
         print(f"[{self.address_string()}] {format % args}")
 
     def send_json(self, data, status=200):
-        body = json.dumps(data, default=str).encode()
+        def clean(obj):
+            if isinstance(obj, float) and math.isnan(obj):
+                return None
+            if isinstance(obj, dict):
+                return {k: clean(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [clean(v) for v in obj]
+            return obj
+        
+        body = json.dumps(clean(data), default=str).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", len(body))
