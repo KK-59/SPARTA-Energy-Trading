@@ -136,6 +136,6 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("localhost", 5050), Handler)
-    print("API running at http://localhost:5050")
+    server = HTTPServer(("0.0.0.0", 5050), Handler)
+    print("API running at http://54.66.235.120:5050")
     server.serve_forever()
