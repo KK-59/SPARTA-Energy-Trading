@@ -7,12 +7,6 @@ load_dotenv()
 engine = create_engine(os.getenv('DB_URL'))
 
 def calculate_spreads(zone_a, zone_b):
-    query = """
-        SELECT timestamp, zone, price_eur_mwh
-        FROM prices
-        WHERE zone IN :zones
-        ORDER BY timestamp
-    """
     df = pd.read_sql(
     f"SELECT timestamp, zone, price_eur_mwh FROM prices WHERE zone IN ('{zone_a}', '{zone_b}') ORDER BY timestamp",
     engine

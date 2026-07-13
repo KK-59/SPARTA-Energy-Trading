@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPARTA Dashboard</title>
+<style>
+  :root {
+    --bg:       #0d1117;
+    --bg2:      #161b22;
+    --bg3:      #1c2128;
+    --border:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --blue:     #58a6ff;
+    --green:    #3fb950;
+    --red:      #f85149;
+    --amber:    #e3b341;
+    --purple:   #bc8cff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--blue); }
+  .brand span { color: var(--muted); font-size: 12px; }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  #last-updated { color: var(--muted); font-size: 12px; }
+
+  .toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; background: var(--bg3); border-radius: 20px;
+    border: 1px solid var(--border); cursor: pointer; transition: .2s;
+  }
+  .slider::before {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    background: var(--muted); border-radius: 50%; left: 2px; top: 2px; transition: .2s;
+  }
+  .toggle input:checked + .slider { background: #1f6feb; border-color: var(--blue); }
+  .toggle input:checked + .slider::before { background: #fff; transform: translateX(16px); }
+
+  /* ── Zone selector ── */
+  .zone-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .zone-bar label { color: var(--muted); font-size: 12px; margin-right: 4px; }
+  .zone-btn {
+    padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--muted); cursor: pointer;
+    font-size: 13px; font-weight: 500; transition: all .15s;
+  }
+  .zone-btn:hover { border-color: var(--blue); color: var(--text); }
+  .zone-btn.active { background: #1f6feb33; border-color: var(--blue); color: var(--blue); }
+
+  /* ── Main layout ── */
+  main { padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+
+  section h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: .5px;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 14px;
+  }
+
+  /* ── Zone stat cards ── */
+  #zone-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .zone-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .zone-card-header {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .zone-name {
+    font-size: 18px; font-weight: 700; color: var(--blue);
+  }
+  .zone-ts { font-size: 11px; color: var(--muted); }
+
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .stat-item { display: flex; flex-direction: column; gap: 3px; }
+  .stat-label { font-size: 11px; color: var(--muted); }
+  .stat-value { font-size: 14px; font-weight: 600; }
+
+  .stat-value.pos { color: var(--green); }
+  .stat-value.neg { color: var(--red); }
+  .stat-value.neutral { color: var(--text); }
+
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  .percentile-bar-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .percentile-bar-bg {
+    height: 6px; background: var(--bg3); border-radius: 4px; overflow: hidden;
+  }
+  .percentile-bar-fill {
+    height: 100%; border-radius: 4px; background: var(--blue);
+    transition: width .4s ease;
+  }
+  .percentile-labels {
+    display: flex; justify-content: space-between; font-size: 10px; color: var(--muted);
+  }
+
+  /* ── Signals section ── */
+  .signals-toolbar {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; color: var(--muted); }
+
+  .pair-btn {
+    padding: 4px 11px; border-radius: 14px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--muted); cursor: pointer;
+    font-size: 12px; transition: all .15s;
+  }
+  .pair-btn:hover { border-color: var(--purple); color: var(--text); }
+  .pair-btn.active { background: #6e40c933; border-color: var(--purple); color: var(--purple); }
+
+  .arb-toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted); cursor: pointer; margin-left: auto;
+  }
+  .arb-toggle input { accent-color: var(--green); width: 14px; height: 14px; }
+
+  .table-wrap {
+    overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  thead th {
+    padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .4px;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  tbody td { padding: 9px 14px; white-space: nowrap; }
+
+  .row-arb { background: #3fb95011; }
+  .row-arb:hover { background: #3fb95022; }
+  .row-spike { background: #f8514911; }
+  .row-spike:hover { background: #f8514922; }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-green { background: #3fb95022; color: var(--green); border: 1px solid #3fb95044; }
+  .badge-red   { background: #f8514922; color: var(--red);   border: 1px solid #f8514944; }
+  .badge-amber { background: #e3b34122; color: var(--amber); border: 1px solid #e3b34144; }
+  .badge-gray  { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  .z-pos { color: var(--green); }
+  .z-neg { color: var(--red); }
+  .z-neut { color: var(--text); }
+
+  .empty-state {
+    text-align: center; padding: 48px 0; color: var(--muted);
+  }
+  .empty-state p { margin-top: 8px; font-size: 12px; }
+
+  .error-banner {
+    background: #f8514911; border: 1px solid #f8514933; border-radius: 8px;
+    padding: 12px 16px; color: var(--red); font-size: 13px; margin-bottom: 12px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>SPARTA</h1>
+    <span>European Power Price Monitor</span>
+  </div>
+  <div class="header-right">
+    <span id="last-updated">—</span>
+    <div class="toggle-wrap">
+      Auto-refresh
+      <label class="toggle">
+        <input type="checkbox" id="auto-refresh">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+</header>
+
+<div class="zone-bar">
+  <label>Zones</label>
+  <div id="zone-buttons"></div>
+</div>
+
+<main>
+  <div id="error-banner" class="error-banner"></div>
+
+  <!-- Zone Stats -->
+  <section id="stats-section">
+    <h2>Zone Statistics</h2>
+    <div id="zone-cards"><div class="empty-state">Select zones above to load statistics.</div></div>
+  </section>
+
+  <!-- Signals -->
+  <section id="signals-section">
+    <h2>Trading Signals <span id="signal-count" style="color:var(--muted);font-weight:400;font-size:12px;"></span></h2>
+    <div class="signals-toolbar">
+      <span class="filter-label">Pairs</span>
+      <div id="pair-buttons"></div>
+      <label class="arb-toggle">
+        <input type="checkbox" id="arb-only"> Arb candidates only
+      </label>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Spread Pair</th>
+            <th>Spread (€/MWh)</th>
+            <th>Roll Mean</th>
+            <th>Z-Score</th>
+            <th>Arb</th>
+            <th>Persistent</th>
+            <th>Trade Direction</th>
+            <th>Divergence</th>
+            <th>Div Z</th>
+            <th>Flags</th>
+          </tr>
+        </thead>
+        <tbody id="signals-body">
+          <tr><td colspan="11"><div class="empty-state">No data loaded.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const API = 'http://54.66.235.120:5050';
+
+const SPREAD_PAIRS_MAP = {
+  'DE_LU_FR':   ['DE_LU', 'FR'],
+  'DE_LU_NL':   ['DE_LU', 'NL'],
+  'DE_LU_BE':   ['DE_LU', 'BE'],
+  'FR_BE':      ['FR',    'BE'],
+  'FR_NL':      ['FR',    'NL'],
+  'NO_2_DE_LU': ['NO_2',  'DE_LU'],
+};
+
+let selectedZones = new Set();
+let selectedPairs = new Set();
+let arbOnly = false;
+let refreshTimer = null;
+
+// ── Utilities ────────────────────────────────────────────────
+function fmt(v, decimals = 2) {
+  if (v === null || v === undefined) return '—';
+  return Number(v).toFixed(decimals);
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function colorClass(v, posGood = true) {
+  if (v === null || v === undefined) return 'neutral';
+  return (v >= 0) === posGood ? 'pos' : 'neg';
+}
+
+function zClass(z) {
+  if (z === null || z === undefined) return 'z-neut';
+  const n = Number(z);
+  if (n > 1.5) return 'z-pos';
+  if (n < -1.5) return 'z-neg';
+  return 'z-neut';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+// ── Zone buttons ─────────────────────────────────────────────
+function buildZoneButtons(zones) {
+  const wrap = document.getElementById('zone-buttons');
+  wrap.innerHTML = '';
+  zones.forEach(z => {
+    const btn = document.createElement('button');
+    btn.className = 'zone-btn';
+    btn.textContent = z;
+    btn.dataset.zone = z;
+    btn.onclick = () => toggleZone(z, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function toggleZone(zone, btn) {
+  if (selectedZones.has(zone)) {
+    selectedZones.delete(zone);
+    btn.classList.remove('active');
+  } else {
+    selectedZones.add(zone);
+    btn.classList.add('active');
+  }
+  updatePairButtons();
+  loadAll();
+}
+
+// ── Pair buttons ─────────────────────────────────────────────
+function updatePairButtons() {
+  const wrap = document.getElementById('pair-buttons');
+  wrap.innerHTML = '';
+  const relevantPairs = Object.keys(SPREAD_PAIRS_MAP).filter(p =>
+    SPREAD_PAIRS_MAP[p].some(z => selectedZones.has(z))
+  );
+
+  // reset selectedPairs to only valid ones
+  selectedPairs = new Set([...selectedPairs].filter(p => relevantPairs.includes(p)));
+
+  relevantPairs.forEach(pair => {
+    const btn = document.createElement('button');
+    btn.className = 'pair-btn' + (selectedPairs.has(pair) || selectedPairs.size === 0 ? ' active' : '');
+    btn.textContent = pair.replace(/_/g, '/');
+    btn.dataset.pair = pair;
+    btn.onclick = () => togglePair(pair, btn);
+    wrap.appendChild(btn);
+  });
+}
+
+function togglePair(pair, btn) {
+  if (selectedPairs.has(pair)) {
+    selectedPairs.delete(pair);
+  } else {
+    selectedPairs.add(pair);
+  }
+  // if none selected = show all
+  document.querySelectorAll('.pair-btn').forEach(b => {
+    b.classList.toggle('active', selectedPairs.size === 0 || selectedPairs.has(b.dataset.pair));
+  });
+  renderSignalsTable(window._signalsData || []);
+}
+
+// ── Zone stat cards ───────────────────────────────────────────
+function renderZoneCards(data) {
+  const grid = document.getElementById('zone-cards');
+  if (!data.length) {
+    grid.innerHTML = '<div class="empty-state">No zone statistics found.</div>';
+    return;
+  }
+
+  grid.innerHTML = data.map(z => {
+    const pct = z.price_percentile_rank !== null ? (z.price_percentile_rank * 100).toFixed(1) : null;
+    const pctFill = pct !== null ? pct : 0;
+    const wowColor = z.wow_change >= 0 ? 'pos' : 'neg';
+    const momColor = z.price_momentum_4h >= 0 ? 'pos' : 'neg';
+
+    return `
+    <div class="zone-card">
+      <div class="zone-card-header">
+        <span class="zone-name">${z.zone}</span>
+        <span class="zone-ts">${fmtTime(z.timestamp)}</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-item">
+          <span class="stat-label">Daily Min</span>
+          <span class="stat-value neutral">${fmt(z.daily_min)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Daily Max</span>
+          <span class="stat-value neutral">${fmt(z.daily_max)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Daily Range</span>
+          <span class="stat-value neutral">${fmt(z.daily_range)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Weekly Mean</span>
+          <span class="stat-value neutral">${fmt(z.weekly_mean)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Weekly Std</span>
+          <span class="stat-value neutral">${fmt(z.weekly_std)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">WoW Change</span>
+          <span class="stat-value ${wowColor}">${z.wow_change >= 0 ? '+' : ''}${fmt(z.wow_change)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">4h Momentum</span>
+          <span class="stat-value ${momColor}">${z.price_momentum_4h >= 0 ? '+' : ''}${fmt(z.price_momentum_4h)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Peak/Off-peak</span>
+          <span class="stat-value neutral">${fmt(z.peak_offpeak_ratio, 3)}×</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="stat-grid">
+        <div class="stat-item">
+          <span class="stat-label">7d Avg Min</span>
+          <span class="stat-value neutral">${fmt(z.daily_avg_min_7d)} €</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">7d Avg Max</span>
+          <span class="stat-value neutral">${fmt(z.daily_avg_max_7d)} €</span>
+        </div>
+      </div>
+
+      ${pct !== null ? `
+      <div class="percentile-bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+          <span>24h Price Percentile</span>
+          <span style="color:var(--text);font-weight:600;">${pct}%</span>
+        </div>
+        <div class="percentile-bar-bg">
+          <div class="percentile-bar-fill" style="width:${pctFill}%;background:${pctFill > 75 ? 'var(--red)' : pctFill < 25 ? 'var(--green)' : 'var(--blue)'};"></div>
+        </div>
+        <div class="percentile-labels"><span>Low</span><span>High</span></div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── Signals table ─────────────────────────────────────────────
+function renderSignalsTable(data) {
+  window._signalsData = data;
+  const tbody = document.getElementById('signals-body');
+
+  const filtered = data.filter(row => {
+    if (selectedPairs.size > 0 && !selectedPairs.has(row.spread_pair)) return false;
+    return true;
+  });
+
+  document.getElementById('signal-count').textContent = filtered.length ? `(${filtered.length})` : '';
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty-state">No signals match your filters.<p>Try selecting more zones or disabling filters.</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => {
+    const rowClass = r.arb_candidate ? 'row-arb' : r.price_spike_flag ? 'row-spike' : '';
+    const zVal = r.z_score !== null ? Number(r.z_score).toFixed(2) : '—';
+
+    const flags = [
+      r.negative_price_flag ? '<span class="badge badge-red">NEG PRICE</span>' : '',
+      r.price_spike_flag    ? '<span class="badge badge-amber">SPIKE</span>' : '',
+    ].filter(Boolean).join(' ') || '—';
+
+    return `<tr class="${rowClass}">
+      <td>${fmtTime(r.timestamp)}</td>
+      <td style="font-weight:600;">${r.spread_pair.replace(/_/g, '/')}</td>
+      <td class="${colorClass(r.spread_value)}">${fmt(r.spread_value)}</td>
+      <td>${fmt(r.roll_mean)}</td>
+      <td class="${zClass(r.z_score)}">${zVal}</td>
+      <td>${r.arb_candidate ? '<span class="badge badge-green">YES</span>' : '<span class="badge badge-gray">no</span>'}</td>
+      <td>${r.persistent ? '<span class="badge badge-amber">YES</span>' : '<span class="badge badge-gray">no</span>'}</td>
+      <td style="color:var(--muted);font-size:12px;">${r.trade_direction || '—'}</td>
+      <td>${fmt(r.divergence)}</td>
+      <td class="${zClass(r.divergence_z)}">${fmt(r.divergence_z)}</td>
+      <td>${flags}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Data fetching ─────────────────────────────────────────────
+async function loadAll() {
+  showError('');
+  const zones = [...selectedZones];
+  if (!zones.length) {
+    document.getElementById('zone-cards').innerHTML = '<div class="empty-state">Select zones above to load statistics.</div>';
+    document.getElementById('signals-body').innerHTML = '<tr><td colspan="11"><div class="empty-state">Select zones to load signals.</div></td></tr>';
+    return;
+  }
+
+  const zonesParam = zones.map(z => `zones=${encodeURIComponent(z)}`).join('&');
+  const arbParam = arbOnly ? '&arb_only=true' : '';
+
+  try {
+    const [statsRes, signalsRes] = await Promise.all([
+      fetch(`${API}/api/zone_stats?${zonesParam}`),
+      fetch(`${API}/api/signals?${zonesParam}${arbParam}`),
+    ]);
+
+    if (!statsRes.ok || !signalsRes.ok) throw new Error('API error');
+
+    const [stats, signals] = await Promise.all([statsRes.json(), signalsRes.json()]);
+    renderZoneCards(stats);
+    renderSignalsTable(signals);
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString('en-GB');
+  } catch (e) {
+    showError('Could not reach API at ' + API + ' — make sure api.py is running (python api.py).');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch(`${API}/api/zones`);
+    const zones = await res.json();
+    buildZoneButtons(zones);
+  } catch {
+    buildZoneButtons(['FR', 'DE_LU', 'NO_2', 'NL', 'BE']);
+    showError('Could not reach API at ' + API + ' — make sure api.py is running (python api.py).');
+  }
+}
+
+document.getElementById('arb-only').addEventListener('change', e => {
+  arbOnly = e.target.checked;
+  loadAll();
+});
+
+document.getElementById('auto-refresh').addEventListener('change', e => {
+  if (e.target.checked) {
+    refreshTimer = setInterval(loadAll, 30_000);
+  } else {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+});
+
+init();
+</script>
+</body>
+</html>
