@@ -382,8 +382,8 @@ function renderZoneCards(data) {
   }
 
   grid.innerHTML = data.map(z => {
-    const pct = z.price_percentile_rank !== null ? (z.price_percentile_rank * 100).toFixed(1) : null;
-    const pctFill = pct !== null ? pct : 0;
+    const pct = z.price_percentile_rank !== null ? Number(z.price_percentile_rank).toFixed(1) : null;
+const pctFill = pct !== null ? Math.min(Number(pct), 100) : 0;
     const wowColor = z.wow_change >= 0 ? 'pos' : 'neg';
     const momColor = z.price_momentum_4h >= 0 ? 'pos' : 'neg';
 
