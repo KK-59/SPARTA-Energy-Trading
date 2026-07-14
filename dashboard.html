@@ -267,6 +267,7 @@
 
 <script>
 const API = 'https://appendage-parabola-prominent.ngrok-free.dev';
+const HEADERS = { "ngrok-skip-browser-warning": "true" };
 
 const SPREAD_PAIRS_MAP = {
   'DE_LU_FR':   ['DE_LU', 'FR'],
@@ -514,8 +515,8 @@ async function loadAll() {
 
   try {
     const [statsRes, signalsRes] = await Promise.all([
-      fetch(`${API}/api/zone_stats?${zonesParam}`),
-      fetch(`${API}/api/signals?${zonesParam}${arbParam}`),
+      fetch(`${API}/api/zone_stats?${zonesParam}`, {headers : HEADERS}),
+      fetch(`${API}/api/signals?${zonesParam}${arbParam}`, {headers : HEADERS}),
     ]);
 
     if (!statsRes.ok || !signalsRes.ok) throw new Error('API error');
@@ -532,7 +533,7 @@ async function loadAll() {
 // ── Init ──────────────────────────────────────────────────────
 async function init() {
   try {
-    const res = await fetch(`${API}/api/zones`);
+    const res = await fetch(`${API}/api/zones`, {headers : HEADERS});
     const zones = await res.json();
     buildZoneButtons(zones);
   } catch {

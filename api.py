@@ -41,6 +41,14 @@ class Handler(BaseHTTPRequestHandler):
             if isinstance(obj, list):
                 return [clean(v) for v in obj]
             return obj
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", len(body))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("ngrok-skip-browser-warning", "true")
+        self.end_headers()
+        self.wfile.write(body)
         
         body = json.dumps(clean(data), default=str).encode()
         self.send_response(status)
@@ -54,6 +62,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
         self.end_headers()
 
     def do_GET(self):
