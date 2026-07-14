@@ -34,6 +34,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def send_json(self, data, status=200):
         def clean(obj):
+            import math
             if isinstance(obj, float) and math.isnan(obj):
                 return None
             if isinstance(obj, dict):
@@ -41,20 +42,17 @@ class Handler(BaseHTTPRequestHandler):
             if isinstance(obj, list):
                 return [clean(v) for v in obj]
             return obj
+        
+        try:
+            body = json.dumps(clean(data), default=str).encode()
+        except Exception as e:
+            body = json.dumps({"error": str(e)}).encode()
+        
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", len(body))
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "*")
-        self.send_header("ngrok-skip-browser-warning", "true")
-        self.end_headers()
-        self.wfile.write(body)
-        
-        body = json.dumps(clean(data), default=str).encode()
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", len(body))
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
 
