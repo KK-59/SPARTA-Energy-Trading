@@ -68,7 +68,7 @@ def run_all():
     try:
         df = load_prices_for_stats(engine, ZONES)
         # only last 48 hours for efficiency
-        cutoff = pd.Timestamp.now(tz='UTC') - pd.Timedelta(hours=48)
+        cutoff = pd.Timestamp.now(tz='UTC') - pd.Timedelta(days=14)
         df = df[df['timestamp'] >= cutoff]
         for zone in ZONES:
             stats = compute_zone_stats(df, zone)
